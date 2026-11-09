@@ -1,0 +1,29 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Sim outputs
+sim/*
+!sim/.gitkeep
+
+# Vivado / xsim junk
+*.jou
+*.log
+*.pb
+*.wdb
+*.str
+xsim.dir/
+.Xil/
+webtalk*
+usage_statistics_webtalk.*
+vivado_*.backup.*
+*.cache/
+*.hw/
+*.runs/
+*.sim/
+*.ip_user_files/
+syn/out/*.dcp
+
+# Keep synthesis reports
+!syn/reports/*.log
