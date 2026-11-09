@@ -26,7 +26,7 @@ See ref/README.md. Spec PDF: docs/spec/sparkle-spec-final.pdf.
     python slides/build_slides.py   # after sourcing scripts/env.sh
 
 ## Simulate
-    scripts/run_sim.sh           # (coming in Phase 3)
+    scripts/run_sim.sh tb_alzette   # prints TEST PASSED/FAILED, exit 0 on pass
 
 ## Synthesize
     scripts/run_syn.sh           # (coming in Phase 3, task 7)
