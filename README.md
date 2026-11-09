@@ -28,6 +28,9 @@ See ref/README.md. Spec PDF: docs/spec/sparkle-spec-final.pdf.
 ## Simulate
     scripts/run_sim.sh tb_alzette   # prints TEST PASSED/FAILED, exit 0 on pass
 
+## Check that a module synthesizes cleanly
+    scripts/check_synth.sh alzette  # fails on errors, critical warnings, latches
+
 ## Synthesize
     scripts/run_syn.sh           # (coming in Phase 3, task 7)
     Target part is set in syn/part.tcl (default xc7a100tcsg324-1, Arty A7).

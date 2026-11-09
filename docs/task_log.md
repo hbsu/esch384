@@ -8,3 +8,5 @@
 | Phase 2: custom KATs, unit vectors, debug trace | Henry Su | Done | `make check` in ref/: 5/5 PASS | 2026-11-09 |
 | Phase 2: slides 1-3, 8, 11 | Henry Su | Done | deck builds, no shapes off-page | 2026-11-09 |
 | P3 task 1: Alzette ARX-box (rtl/alzette.sv, combinational) + tb_alzette | Henry Su | Done | 64/64 vectors pass; mutated copy fails 64/64 | 2026-11-09 |
+| Synthesis check script (scripts/check_synth.sh, syn/part.tcl) | Henry Su | Done | alzette: 254 LUTs, 0 latches; latch test module correctly FAILS | 2026-11-09 |
+| P3 task 2: linear layer L8 (rtl/sparkle_linear.sv) + tb_sparkle_linear | Henry Su | Done | 64/64 pass; 2 mutated copies fail; synth OK, 320 LUTs | 2026-11-09 |
