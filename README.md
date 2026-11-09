@@ -18,6 +18,13 @@ NCSU ECE 545 course project. Team: Henry Su, Nick Ngo.
     python3 -m venv .venv && .venv/bin/pip install python-pptx graphviz matplotlib
     source scripts/env.sh        # loads Vivado/xsim 2026.1 + venv
 
+## Reference model
+    cd ref && make check         # builds the C model, runs all reference checks
+See ref/README.md. Spec PDF: docs/spec/sparkle-spec-final.pdf.
+
+## Slides
+    python slides/build_slides.py   # after sourcing scripts/env.sh
+
 ## Simulate
     scripts/run_sim.sh           # (coming in Phase 3)
 
