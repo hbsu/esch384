@@ -27,7 +27,7 @@ finalist). Team: Henry Su, Nick Ngo.
   `docs/course_notes.md`. Don't modify or commit them.
 
 ## Git
-- Remote: my personal GitHub [REPO URL]. Check whether SSH or `gh` auth
+- Remote: my personal GitHub https://github.com/hbsu/esch384.git. Check whether SSH or `gh` auth
   works; if not, tell me what to set up. Don't push until I confirm.
 - Commit after each passing task with a clear message.
 
