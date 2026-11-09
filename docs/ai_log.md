@@ -8,6 +8,7 @@
 | 2026-11-09 | Claude Code (Claude Opus 5.5) | scripts/check_synth.sh, syn/part.tcl, syn/check_synth.tcl | Synthesizability check (Vivado out-of-context synth; fails on errors, critical warnings, latches) |
 | 2026-11-09 | Claude Code sub-agent (Claude Opus 5.5) | rtl/sparkle_linear.sv, tb/tb_sparkle_linear.sv | Phase 3 task 2: linear layer RTL + testbench. Reviewed and re-tested by lead agent |
 | 2026-11-09 | Claude Code sub-agent (Claude Opus 5.5) | rtl/sparkle_step.sv, rtl/sparkle512.sv, tb/tb_sparkle512.sv | Phase 3 task 3: one-step-per-cycle permutation + testbench. Reviewed and re-tested by lead agent |
+| 2026-11-09 | Claude Code (Claude Opus 5.5) | docs/rtl_workflow.md | Step-by-step RTL workflow and task 4-6 specs for Nick |
 
 ## Notable prompts
 - "Begin Phase 1" (from CLAUDE.md): environment check, course notes,

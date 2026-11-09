@@ -4,6 +4,8 @@ Hardware implementation of **Esch384**, the 384-bit hash from the
 SPARKLE family (NIST Lightweight Cryptography finalist).
 NCSU ECE 545 course project. Team: Henry Su, Nick Ngo.
 
+**Working on RTL? Start with [docs/rtl_workflow.md](docs/rtl_workflow.md).**
+
 ## Layout
     docs/      course notes, architecture, task log, AI log, diagrams
     ref/       reference model + known-answer tests (KATs)
