@@ -79,7 +79,7 @@ Setup: tools, repo, course notes & Henry & Done & Vivado/xsim 2026.1 working \\
 Reference model and test vectors & Henry & Done & Matches all 1025 official test vectors \\
 Alzette & Henry & Done & 64/64 tests pass; 254 LUTs \\
 Linear layer & Henry & Done & 64/64 tests pass; 320 LUTs \\
-SPARKLE512 permutation & Henry & Done & 71/71 tests pass; 2023 LUTs, 521 FFs; clock speed pending \\
+SPARKLE512 permutation & Henry & Done & 71/71 tests pass; 2023 LUTs, 521 FFs; max clock 76 MHz \\
 Datapath and controller & Nick & Nov 17 & Specs and test plan written \\
 Full hash, all test vectors & Nick & Nov 21 & -- \\
 Synthesis: area, speed, throughput & Henry & Nov 24 & -- \\
@@ -88,10 +88,10 @@ Final presentation and report & Both & Dec 9 & -- \\
 \bottomrule
 \end{tabular}}
 
-{\small LUT/FF counts are post-synthesis (Vivado, module on its own). 2023 is less than
-$8\times254+320$ because inside the permutation the constants are fixed, so Vivado simplifies
-them away and packs the linear-layer XORs into the same LUTs as the Alzette logic.
-SPARKLE512 takes 9 cycles for 8 steps and 13 for 12 steps: one cycle to load the state, then one step per cycle.}
+{\small LUT/FF counts are post-synthesis (Vivado, module on its own); 76 MHz is after place and route. 2023 is less than
+$8\times254+320$ because inside the permutation the constants are fixed, so Vivado simplifies them
+and packs the linear-layer XORs into the same LUTs as the Alzette logic.
+SPARKLE512 takes 9 / 13 cycles: 1 load cycle + 8 or 12 steps.}
 
 \sect{Challenges and how we solved them}
 \begin{itemize}

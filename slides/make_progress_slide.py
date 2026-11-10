@@ -108,7 +108,7 @@ text(7.3, 1.65, 5.6, 5.0, [
     "**Progress (Henry: done; Nick: next)",
     "Done: reference model, all 1025 official tests",
     "Done: Alzette, linear layer, SPARKLE512",
-    "     all unit tests pass; 2023 LUTs, 521 FFs",
+    "     all tests pass; 2023 LUTs, 521 FFs, 76 MHz",
     "Next: datapath, controller, full hash (Nick)",
     "**Risks and challenges",
     "Each block tested alone against official C code",
