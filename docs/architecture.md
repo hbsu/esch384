@@ -59,4 +59,67 @@ See `ref/README.md`.
 
 ## 3. Datapath, controller, timing
 
-To be filled in Phase 3.
+### 3.1 Controller `esch_ctrl` (rtl/esch_ctrl.sv)
+
+Block data and byte count go straight from the input bus to the datapath.
+The controller only makes the control signals.
+
+| Port | Dir | Width | Meaning |
+|------|-----|-------|---------|
+| clk, rst | in | 1 | clock; sync active-high reset -> WAIT |
+| in_valid | in | 1 | sender has a block on the bus |
+| in_ready | out | 1 | 1 only in WAIT; block accepted when in_valid && in_ready |
+| in_last | in | 1 | this block is the final one |
+| in_bytes | in | 5 | bytes in the block, 0..16 (0 only for empty message); used by the datapath, not the FSM |
+| out_valid | out | 1 | 1 only in OUT: datapath digest_chunk holds D0/D1/D2 |
+| out_ready | in | 1 | receiver takes the chunk when out_valid && out_ready |
+| out_last | out | 1 | 1 with out_valid on D2 |
+| dp_clear | out | 1 | 1 on the cycle D2 is accepted (state <- 0) |
+| dp_inject | out | 1 | = in_valid && in_ready |
+| dp_step_en | out | 1 | 1 in ABS and SQZ |
+| dp_step_idx | out | 4 | step number (0..7 slim, 0..11 big) |
+| dp_msg_last | out | 1 | = in_last (used with dp_inject) |
+| busy | out | 1 | 1 from the cycle after the first block is accepted until the D2 accept cycle |
+
+Registers: `state` (2 bits), step counter `cnt` (4), `big` (final block
+absorbing), `chunk` (0..2), `in_msg` (between blocks of a message).
+
+### 3.2 FSM states and transitions
+
+| State | Outputs | Condition | Next | Register updates |
+|-------|---------|-----------|------|------------------|
+| WAIT | in_ready=1; dp_inject=in_valid | in_valid=0 | WAIT | - |
+| WAIT | | in_valid=1 | ABS | cnt<=0, big<=in_last, in_msg<=!in_last |
+| ABS | dp_step_en=1, idx=cnt | cnt < last (7, or 11 if big) | ABS | cnt++ |
+| ABS | | cnt = last, big=0 | WAIT | cnt<=0 |
+| ABS | | cnt = last, big=1 | OUT | cnt<=0 (chunk=0) |
+| OUT | out_valid=1, out_last=(chunk=2) | out_ready=0 | OUT | hold |
+| OUT | | out_ready=1, chunk<2 | SQZ | chunk++, cnt<=0 |
+| OUT | dp_clear=1 | out_ready=1, chunk=2 | WAIT | chunk<=0 |
+| SQZ | dp_step_en=1, idx=cnt | cnt < 7 | SQZ | cnt++ |
+| SQZ | | cnt = 7 | OUT | cnt<=0 |
+
+All outputs not listed are 0. busy = (state != WAIT) || in_msg.
+
+### 3.3 Latency
+
+n blocks, no stalls, counted from the cycle the first block is accepted
+(cycle 1) to the cycle D2 is accepted:
+
+    9(n-1) + 13 + (1 + 8 + 1 + 8 + 1) = 9n + 23 cycles
+
+Each non-final block costs 1 accept cycle + 8 steps. Steps = 8n + 20.
+The next message's first block can be accepted the cycle after D2.
+
+### 3.4 Cycle-by-cycle example: 1-block message (n = 1, no stalls)
+
+| Cycle | State | in_ready | dp_inject | dp_step_en / idx | out_valid | Notes |
+|-------|-------|----------|-----------|------------------|-----------|-------|
+| 1 | WAIT | 1 | 1 | 0 | 0 | block accepted, injected at end of cycle |
+| 2..13 | ABS | 0 | 0 | 1 / 0..11 | 0 | 12 big steps |
+| 14 | OUT | 0 | 0 | 0 | 1 | D0 accepted |
+| 15..22 | SQZ | 0 | 0 | 1 / 0..7 | 0 | 8 slim steps |
+| 23 | OUT | 0 | 0 | 0 | 1 | D1 accepted |
+| 24..31 | SQZ | 0 | 0 | 1 / 0..7 | 0 | 8 slim steps |
+| 32 | OUT | 0 | 0 | 0 | 1 | D2 accepted, out_last=1, dp_clear=1 |
+| 33 | WAIT | 1 | | 0 | 0 | ready for next message |
