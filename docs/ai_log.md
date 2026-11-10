@@ -10,6 +10,7 @@
 | 2026-11-09 | Claude Code sub-agent (Claude Opus 5.5) | rtl/sparkle_step.sv, rtl/sparkle512.sv, tb/tb_sparkle512.sv | Phase 3 task 3: one-step-per-cycle permutation + testbench. Reviewed and re-tested by lead agent |
 | 2026-11-09 | Claude Code (Claude Opus 5.5) | docs/rtl_workflow.md | Step-by-step RTL workflow and task 4-6 specs for Nick |
 | 2026-11-10 | Claude Code (Claude Opus 5.5) | docs/design_doc/design_doc.tex, design_doc.pdf | Phase 2 course deliverable: 1-page design document |
+| 2026-11-10 | Claude Code (Claude Opus 5.5) | slides/make_progress_slide.py, slides/esch384_progress.pptx | One-slide progress report for 11/11 lecture |
 
 ## Notable prompts
 - "Begin Phase 1" (from CLAUDE.md): environment check, course notes,
