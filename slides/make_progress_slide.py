@@ -57,9 +57,14 @@ def box(x, y, w, h, label, size=14):
     return b
 
 
-def arrow(x1, y1, x2, y2):
+def seg(x1, y1, x2, y2):
     c = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x1), Inches(y1), Inches(x2), Inches(y2))
     c.line.color.rgb, c.line.width = BLACK, Pt(1.5)
+    return c
+
+
+def arrow(x1, y1, x2, y2):
+    c = seg(x1, y1, x2, y2)
     c.line._get_or_add_ln().append(
         c.line._get_or_add_ln().makeelement(
             "{http://schemas.openxmlformats.org/drawingml/2006/main}tailEnd", {"type": "triangle"}))
@@ -67,7 +72,7 @@ def arrow(x1, y1, x2, y2):
 
 # Title
 text(0.5, 0.3, 12.3, 0.7, ["Esch384 Hash on FPGA: Progress Report"], size=30, bold_first=True)
-text(0.5, 0.95, 12.3, 0.4, ["Henry Su, Nick Ngo  |  ECE 545 Final Project"], size=16)
+text(0.5, 0.95, 12.3, 0.4, ["Henry Su, Nick Ngo  |  ECE 545 Final Project  |  Design Document"], size=16)
 line = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(0.5), Inches(1.45), Inches(12.83), Inches(1.45))
 line.line.color.rgb, line.line.width = BLACK, Pt(1)
 
@@ -76,30 +81,39 @@ text(0.5, 1.65, 6.3, 0.4, ["**Design: iterative, one step per clock cycle"], siz
 box(2.4, 2.2, 2.6, 0.75, "Controller\nstate machine")
 box(0.5, 3.4, 1.4, 1.0, "Message\n16 B / block")
 box(2.4, 3.3, 2.6, 1.2, "Datapath\n512-bit state, padding,\nmessage injection")
-box(5.5, 3.4, 1.3, 1.0, "Digest\n48 B")
+box(5.55, 3.4, 1.5, 1.0, "Digest\n48 B (3 × 16 B)")
 box(2.4, 5.0, 2.6, 1.2, "SPARKLE512 step\n8 Alzette boxes\n+ linear layer")
 arrow(1.9, 3.9, 2.4, 3.9)
-arrow(5.0, 3.9, 5.5, 3.9)
+arrow(5.0, 3.9, 5.55, 3.9)
 arrow(3.7, 2.95, 3.7, 3.3)
 arrow(3.3, 4.5, 3.3, 5.0)   # state into step
 arrow(4.1, 5.0, 4.1, 4.5)   # result back
-text(0.5, 6.35, 6.3, 0.8, ["8 steps per block, 12 on the last block", "Target board: Arty A7 (Artix-7), Vivado"], size=13)
+# controller also drives the step: step number (constant) and 8 or 12 steps
+seg(5.0, 2.575, 5.28, 2.575)
+seg(5.28, 2.575, 5.28, 5.6)
+arrow(5.28, 5.6, 5.0, 5.6)
+text(5.3, 4.95, 1.9, 0.6, ["step number,", "8 or 12 steps"], size=11)
+text(0.5, 6.25, 6.6, 0.4, ["Arty A7 (Artix-7), Vivado 2026.1, Claude Code (AI, all use logged)"], size=12)
+
+# Timeline band
+line2 = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(0.5), Inches(6.72), Inches(12.83), Inches(6.72))
+line2.line.color.rgb, line2.line.width = BLACK, Pt(1)
+text(0.5, 6.8, 12.3, 0.5, ["**Plan:  Nov 17 datapath + controller  →  Nov 21 full hash  →  Nov 24 synthesis  →  Dec 1 area optimization  →  Dec 9 final presentation"], size=14)
 
 # Right column
-text(7.3, 1.65, 5.6, 5.6, [
+text(7.3, 1.65, 5.6, 5.0, [
     "**Goal: smallest area",
     "Serialize: 8 → 4 → 2 → 1 Alzette boxes",
     "Compare LUTs, flip-flops, clock speed, throughput",
-    "**Progress",
+    "**Progress (Henry: done; Nick: next)",
     "Done: reference model, all 1025 official tests",
     "Done: Alzette, linear layer, SPARKLE512",
-    "     (all unit tests pass; 2023 LUTs, 521 FFs)",
-    "Next: datapath, controller, full hash, synthesis",
+    "     all unit tests pass; 2023 LUTs, 521 FFs",
+    "Next: datapath, controller, full hash (Nick)",
     "**Risks and challenges",
     "Each block tested alone against official C code",
     "Unclear byte order → checked with C code",
-    "Simulator crash → simpler testbench code",
-], size=16)
+], size=15)
 
 out = Path(__file__).resolve().parent / "esch384_progress.pptx"
 prs.save(out)

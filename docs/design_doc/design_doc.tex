@@ -14,7 +14,7 @@
 
 \begin{center}
 {\Large\bfseries Esch384 Hash on FPGA: Design Document}\\[2pt]
-ECE 545 Project, Phase 2 \quad\textbullet\quad Henry Su, Nick Ngo \quad\textbullet\quad November 10, 2026
+ECE 545 Final Project \quad\textbullet\quad Henry Su, Nick Ngo \quad\textbullet\quad November 10, 2026
 \end{center}
 
 \sect{Goal}
@@ -31,7 +31,7 @@ Hashing a message of $n$ blocks takes $8n+20$ steps (8 per block, 4 extra on the
 and 16 to output the 3 digest pieces).
 
 \sect{Components}
-\begin{tabular}{@{}ll@{}}
+{\small\begin{tabular}{@{}ll@{}}
 \toprule
 Block & What it does \\
 \midrule
@@ -42,57 +42,61 @@ Datapath & 512-bit state register, message padding and injection, digest output.
 Controller & State machine: take block, run steps, output 3 digest pieces; valid/ready handshake. \\
 Top level & Datapath + controller, tested against all known-answer tests. \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 
 \sect{Tools and libraries}
 SystemVerilog (kept close to Verilog-2001); Xilinx Vivado 2026.1 for synthesis and xsim for
 simulation (Questa as backup); target board Arty A7 (Artix-7, \texttt{xc7a100tcsg324-1}).
 Reference: the official NIST C code for Esch384, plus Python scripts that create test vectors and
 compare outputs. No outside hardware libraries (IP cores). Code is on GitHub.
+\textbf{AI tool:} Claude Code (Anthropic). It drafts RTL, testbenches and scripts, and helps with
+debugging; we run every test ourselves before accepting its work. Our proposal named GPT 6 Astra;
+we switched to Claude Code. All AI tool use is logged in the repo (\texttt{docs/ai\_log.md}).
 
-\sect{Optimization target: area}
-Lightweight cryptography is about small area, so area is our target.
-We will report LUTs, flip-flops, maximum clock speed, latency and throughput for every version.
-
-\sect{Planned optimizations}
+\sect{Optimization target: area, and planned optimizations}
+Lightweight cryptography is about small area, so area is our target. For every version we report
+LUTs, flip-flops, maximum clock speed, latency and throughput.
 \begin{itemize}
-\item \textbf{Serialize the Alzettes:} use 4, 2 or 1 Alzette box instead of 8, and take more cycles per step.
-This is the same trick as the round-serial AES designs from lecture 13.
-\item Share adders, reuse registers, and try a narrower datapath.
-\item Each idea gets its own git branch. All tests are re-run after every change.
+\item \textbf{Serialize the Alzettes:} use 4, 2 or 1 Alzette box instead of 8, and take more cycles per step,
+like the 32-bit serial AES datapath in lecture 13 (Aysu et al., ESL'14).
+\item Share adders, reuse registers, try a narrower datapath. One git branch per idea; all tests re-run after every change.
 \end{itemize}
 
 \sect{Risk management}
 \begin{itemize}
-\item \textbf{Wrong results:} every block is tested against the official C code on its own before
-it is used. We also break a copy on purpose to make sure the test catches it.
-\item \textbf{Hard-to-find bugs:} the reference model prints the state after every step, so we can
-find the first step where the hardware and the reference differ.
+\item \textbf{Wrong results:} every block is tested on its own against the official C code, and we break a copy
+on purpose to make sure the test catches it. For bugs, the reference prints the state after every step, so we can find the first step that differs.
 \item \textbf{Schedule:} tasks are small and split between us. The working version gets a git tag
 before any optimization, so we can always go back to it.
 \end{itemize}
 
-\sect{Progress so far}
-\begin{tabular}{@{}lll@{}}
+\sect{Progress and plan}
+{\small\begin{tabular}{@{}llll@{}}
 \toprule
-Item & Status & Result \\
+Item & Owner & Status / due & Result \\
 \midrule
-Setup: tools, repo, course notes & Done & Vivado/xsim 2026.1 working \\
-Reference model and test vectors & Done & Reproduces all 1025 official test vectors \\
-Alzette & Done & 64/64 tests pass, 254 LUTs \\
-Linear layer & Done & 64/64 tests pass, 320 LUTs \\
-SPARKLE512 permutation & Done & 71/71 tests pass, 2023 LUTs, 521 FFs; 9 / 13 cycles \\
-Datapath, controller, top level & Next (Nick) & Specs and test plan written \\
-Synthesis and area optimization & Planned & -- \\
+Setup: tools, repo, course notes & Henry & Done & Vivado/xsim 2026.1 working \\
+Reference model and test vectors & Henry & Done & Matches all 1025 official test vectors \\
+Alzette & Henry & Done & 64/64 tests pass; 254 LUTs \\
+Linear layer & Henry & Done & 64/64 tests pass; 320 LUTs \\
+SPARKLE512 permutation & Henry & Done & 71/71 tests pass; 2023 LUTs, 521 FFs; clock speed pending \\
+Datapath and controller & Nick & Nov 17 & Specs and test plan written \\
+Full hash, all test vectors & Nick & Nov 21 & -- \\
+Synthesis: area, speed, throughput & Henry & Nov 24 & -- \\
+Area optimization & Both & Dec 1 & -- \\
+Final presentation and report & Both & Dec 9 & -- \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
+
+{\small LUT/FF counts are post-synthesis (Vivado, module on its own). 2023 is less than
+$8\times254+320$ because inside the permutation the constants are fixed, so Vivado simplifies
+them away and packs the linear-layer XORs into the same LUTs as the Alzette logic.
+SPARKLE512 takes 9 cycles for 8 steps and 13 for 12 steps: one cycle to load the state, then one step per cycle.}
 
 \sect{Challenges and how we solved them}
 \begin{itemize}
 \item \textbf{Byte and word order were unclear in the spec.} We checked them against the official C code.
 \item \textbf{The simulator (xsim) crashed} on one testbench line. We rewrote the line a simpler way.
-\item \textbf{No admin rights and a full home drive} on the lab machines. We installed packages locally and cleaned old files.
-\item \textbf{No project handout or AI-use rules found.} We log all AI tool use and will ask at office hours.
 \end{itemize}
 
 \end{document}
