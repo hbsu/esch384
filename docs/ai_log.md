@@ -11,6 +11,7 @@
 | 2026-11-09 | Claude Code (Claude Opus 5.5) | docs/rtl_workflow.md | Step-by-step RTL workflow and task 4-6 specs for Nick |
 | 2026-11-10 | Claude Code (Claude Opus 5.5, sub-agent) | rtl/esch_datapath.sv, tb/tb_esch_datapath.sv, scripts/gen_datapath_vectors.py, ref/vectors/datapath.txt | Task 4 datapath on own-attempt branch; interface set by architect agent, tests re-run by architect |
 | 2026-11-10 | Claude Code (Claude Opus 5.5, sub-agent) | rtl/esch_ctrl.sv, tb/tb_esch_ctrl.sv, docs/architecture.md section 3 | Task 5 controller FSM on own-attempt branch; interface set by architect agent, tests re-run by architect |
+| 2026-11-10 | Claude Code (Claude Opus 5.5, sub-agent) | rtl/esch384.sv, tb/tb_esch384.sv, scripts/gen_kat_vectors.py, ref/vectors/kat_*.txt, README.md | Task 6 top level + full KAT test on own-attempt branch; interface set by architect agent, tests re-run by architect |
 
 ## Notable prompts
 - "Begin Phase 1" (from CLAUDE.md): environment check, course notes,

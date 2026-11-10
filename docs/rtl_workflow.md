@@ -78,7 +78,7 @@ squeezes `sq1.s0` … `sq1.s7`, `sq2.s0` … `sq2.s7`.
 
 ## 4. Regression: re-run everything
 
-    for t in tb_alzette tb_sparkle_linear tb_sparkle512 tb_esch_datapath tb_esch_ctrl; do   # add new TBs here
+    for t in tb_alzette tb_sparkle_linear tb_sparkle512 tb_esch_datapath tb_esch_ctrl tb_esch384; do   # add new TBs here
       scripts/run_sim.sh $t > /dev/null 2>&1 && echo "PASS $t" || echo "FAIL $t"
     done
     (cd ref && make check)
@@ -106,6 +106,7 @@ squeezes `sq1.s0` … `sq1.s7`, `sq2.s0` … `sq2.s7`.
 | `sparkle512` | `clk, rst, start, big, state_in` → `state_out, busy, done` | 9 cycles (slim), 13 (big) |
 | `esch_datapath` | `clk, rst, clear, inject, step_en, step_idx [3:0], msg_block [127:0], msg_bytes [4:0], msg_last` → `state_out [511:0], digest_chunk [127:0]` | 1 cycle per action (priority rst > clear > inject > step_en) |
 | `esch_ctrl` | `clk, rst, in_valid, in_last, in_bytes [4:0], out_ready` → `in_ready, out_valid, out_last, dp_clear, dp_inject, dp_step_en, dp_step_idx [3:0], dp_msg_last, busy` | 9n + 23 cycles per n-block message (first accept to D2 accept, no stalls) |
+| `esch384` (top) | `clk, rst, in_valid, in_last, in_bytes [4:0], in_data [127:0], out_ready` → `in_ready, out_valid, out_last, out_data [127:0], busy` | 9n + 23 cycles per n-block message (n = 1 for empty); D0, D1, D2 on out_data |
 
 **State bus convention (everywhere):** 16 words of 32 bits, word k at bits
 `[32k+31:32k]`, order x0 y0 x1 y1 … x7 y7. So x_i = word 2i, y_i = word 2i+1.

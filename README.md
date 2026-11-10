@@ -30,6 +30,11 @@ See ref/README.md. Spec PDF: docs/spec/sparkle-spec-final.pdf.
 ## Simulate
     scripts/run_sim.sh tb_alzette   # prints TEST PASSED/FAILED, exit 0 on pass
 
+## Run the full KAT test (top level, all 1025 official + 34 custom KATs)
+    python3 scripts/gen_kat_vectors.py   # only if a KAT file changed
+    scripts/run_sim.sh tb_esch384        # ~25 s; add TRACE=<count> for a per-step trace
+    python3 scripts/compare_kat.py ref/official/LWC_HASH_KAT_384.txt sim/tb_esch384/out_kat_official.txt
+
 ## Check that a module synthesizes cleanly
     scripts/check_synth.sh alzette  # fails on errors, critical warnings, latches
 
