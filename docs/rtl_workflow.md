@@ -78,10 +78,11 @@ squeezes `sq1.s0` … `sq1.s7`, `sq2.s0` … `sq2.s7`.
 
 ## 4. Regression: re-run everything
 
-    for t in tb_alzette tb_sparkle_linear tb_sparkle512; do   # add new TBs here
+    for t in tb_alzette tb_sparkle_linear tb_sparkle512 tb_esch384; do   # add new TBs here
       scripts/run_sim.sh $t > /dev/null 2>&1 && echo "PASS $t" || echo "FAIL $t"
     done
     (cd ref && make check)
+    scripts/run_sim.sh tb_esch384 KAT=$PWD/ref/official/LWC_HASH_KAT_384.txt  # 1025 official KATs, ~35 s
 
 ## 5. Debugging a mismatch
 

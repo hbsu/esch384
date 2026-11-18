@@ -59,4 +59,92 @@ See `ref/README.md`.
 
 ## 3. Datapath, controller, timing
 
-To be filled in Phase 3.
+### Module tree
+
+    esch384              top level: wires the two blocks below together
+      esch384_ctrl       FSM: when to inject, when to squeeze, handshake
+      esch384_datapath   state path
+        esch_inject      pad + XOR one block (and ConstM) into the state
+        sparkle512       the permutation, one step per cycle
+          sparkle_step   one step (Alzette x8 + linear layer)
+
+The state register lives inside `sparkle512`; the datapath feeds it either a
+freshly injected state (`do_inject`) or its own output (`do_squeeze`), and
+`first` forces a zero state at the start of a new message.
+
+### Top-level ports (`rtl/esch384.sv`)
+
+| Port | Dir | Width | Meaning |
+|------|-----|-------|---------|
+| `clk`, `rst` | in | 1 | clock, synchronous active-high reset |
+| `blk_data` | in | 128 | message block, byte i at bits [8i+7:8i] |
+| `blk_bytes` | in | 5 | valid bytes 0-16; only read on the last block |
+| `in_last` | in | 1 | this is the last block of the message |
+| `in_valid` | in | 1 | sender has a block ready |
+| `in_ready` | out | 1 | core takes a block this cycle |
+| `digest_chunk` | out | 128 | D0, D1, or D2, bytes little-endian |
+| `out_valid` | out | 1 | a digest chunk is on `digest_chunk` now |
+| `out_ready` | in | 1 | receiver takes the chunk this cycle |
+
+A block moves only when `in_valid` and `in_ready` are both high at a rising
+edge; a chunk moves only when `out_valid` and `out_ready` are both high.
+The empty message is one block with `blk_bytes = 0` and `in_last = 1`.
+After D2 is taken the core returns to its start state by itself, so
+back-to-back messages need no reset.
+
+### Controller FSM (`rtl/esch384_ctrl.sv`)
+
+| State | Meaning | Outputs high | Next state |
+|-------|---------|--------------|------------|
+| `S_ABSORB` | waiting for a block | `in_ready`; `do_inject` when `in_valid` | `S_PERM_A` when `in_valid`, else stay |
+| `S_PERM_A` | permuting after a block | - | `S_OUT` when `perm_done` and the block was last; `S_ABSORB` when `perm_done` otherwise; else stay |
+| `S_OUT` | a digest chunk is showing | `out_valid`; `do_squeeze` when `out_ready` and chunk < 2 | `S_PERM_S` when `out_ready` and chunk < 2; `S_ABSORB` when `out_ready` and chunk = 2; else stay |
+| `S_PERM_S` | permuting between chunks | - | `S_OUT` when `perm_done`, else stay |
+
+Registers: `first_r` (1 after reset and after D2, cleared when a block is
+taken), `last_seen` (the `in_last` of the block being permuted), `chunk`
+(0, 1, 2 - which digest chunk is showing).
+
+The permutation is big (12 steps) only when a block is injected with
+`in_last` high; every other permutation is slim (8 steps), which gives the
+8n + 20 steps the spec asks for.
+
+### Timing, one-block message (empty message, measured)
+
+`sparkle512` reports `done` 9 cycles after the start cycle for a slim
+permutation and 13 for a big one. Cycle 0 is the cycle the block is taken.
+
+| Cycle | State | What happens |
+|-------|-------|--------------|
+| 0 | `S_ABSORB` | block taken (`in_valid` and `in_ready`), `do_inject`, injected state loaded |
+| 1-12 | `S_PERM_A` | the 12 big steps |
+| 13 | `S_PERM_A` | `perm_done` |
+| 14 | `S_OUT` | D0 on `digest_chunk`; taken here, `do_squeeze` |
+| 15-22 | `S_PERM_S` | 8 slim steps |
+| 23 | `S_PERM_S` | `perm_done` |
+| 24 | `S_OUT` | D1 taken, `do_squeeze` |
+| 25-33 | `S_PERM_S` | 8 slim steps, `perm_done` in 33 |
+| 34 | `S_OUT` | D2 taken, back to `S_ABSORB` |
+
+So with a sender and receiver that never stall, an n-block message takes
+**10n + 24 cycles** (34 for one block): 10 cycles per absorbed block, 4 extra
+for the bigger final permutation, and 20 for the two squeeze permutations
+plus the three output cycles. `tb_esch384` checks this number on every
+message it runs without stalls.
+
+### Verification
+
+`tb/tb_esch384.sv` feeds every message of a KAT file through the core 16
+bytes at a time and compares the 48-byte digest.
+
+| Check | Result |
+|-------|--------|
+| `ref/official/LWC_HASH_KAT_384.txt` (0-1024 bytes) | 1025/1025 |
+| `ref/kat/esch384_custom_kat.txt` (block edges, 3 patterns) | 34/34 |
+| Cycle count against 10n + 24 | every no-stall message |
+| Handshake: slow sender, slow receiver, chunk held under backpressure | every message (stall pattern varies per record) |
+| Per-step `TRACE` output vs. `esch_tool debug` | identical, empty and 2-block messages |
+
+Mutation check (a deliberately broken copy must fail): wrong ConstM for a
+full final block 12/34 fail, final block permuted slim 34/34 fail, injection
+dropping `ty` from x2 24/34 fail, digest read from the capacity 34/34 fail.
