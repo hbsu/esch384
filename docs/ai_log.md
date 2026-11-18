@@ -12,6 +12,7 @@
 | 2026-11-10 | Claude Code (Claude Opus 5.5) | docs/design_doc/design_doc.tex, design_doc.pdf | Phase 2 course deliverable: 1-page design document |
 | 2026-11-10 | Claude Code (Claude Opus 5.5) | slides/make_progress_slide.py, slides/esch384_progress.pptx | One-slide progress report for 11/11 lecture |
 | 2026-11-10 | Claude Code (Claude Opus 5.5) | slides/pptx_to_pdf.py, slides/esch384_progress.pdf | PDF version of the progress slide (no LibreOffice on Grendel) |
+| 2026-11-18 | Claude Code (Claude Opus 5.5) | rtl/esch_inject.sv, rtl/esch384_datapath.sv, rtl/esch384_ctrl.sv | Nick wrote the RTL; Claude explained the spec, suggested the module split and ports, reviewed each file, gave code snippets (padding loop, l(), ConstM, FSM skeleton), and fixed syntax in esch384_ctrl.sv plus two bugs in esch384_datapath.sv |
 
 ## Notable prompts
 - "Begin Phase 1" (from CLAUDE.md): environment check, course notes,
