@@ -12,9 +12,13 @@
 //           perm_busy asserts while sparkle is permuting so that we know not to pulse do_inject or do_squeeze
 //           perm_done is a one cycle pulse that goes high when the permutation is complete and the state is ready for injection
 //           digest_chunk always shows state_out[127:0] (x0, y0, x1, y1)
-// Latency : sparkle512 is 9 cycles slim and 13 cycles big from the do_inject or do_squeeze cycle to perm_done
+// Params  : NALZ = number of Alzettes in sparkle512 (8, 4, 2 or 1)
+// Latency : from the do_inject or do_squeeze cycle to perm_done, same as
+//           sparkle512: steps*(8/NALZ) + 1 cycles (NALZ = 8: 9 slim, 13 big)
 
-module esch384_datapath (
+module esch384_datapath #(
+    parameter integer NALZ = 8
+) (
     
     input  logic clk, rst,
     input  logic [127:0] blk_data,
@@ -45,7 +49,7 @@ assign cur = first ? 512'd0 : perm_state;
 );
 
 // Takes a state from esch and does either 8 or 12 permutation steps, returning the digest
- sparkle512 u_perm (
+ sparkle512 #(.NALZ(NALZ)) u_perm (
     .clk       (clk), .rst(rst),
     .start     (do_inject | do_squeeze),
     .big       (do_inject & blk_last),

@@ -20,12 +20,17 @@
 // Notes   : An empty message is one block with blk_bytes = 0 and
 //           in_last = 1. After D2 is taken the core resets itself and is
 //           ready for a new message.
+// Params  : NALZ = number of Alzette ARX-boxes (8, 4, 2 or 1). Fewer
+//           Alzettes = less area, NSUB = 8/NALZ cycles per step.
 // Latency : 8n + 20 permutation steps for an n-block message. With a
-//           sender and receiver that never stall, 10n + 24 cycles from
-//           the cycle the first block is taken to the cycle D2 is taken
-//           (34 cycles for a one-block message).
+//           sender and receiver that never stall,
+//           (8*NSUB + 2)*n + 20*NSUB + 4 cycles from the cycle the first
+//           block is taken to the cycle D2 is taken.
+//           NALZ = 8: 10n + 24 (34 cycles for a one-block message).
 
-module esch384 (
+module esch384 #(
+    parameter integer NALZ = 8
+) (
     input  logic         clk,
     input  logic         rst,
     input  logic [127:0] blk_data,
@@ -59,7 +64,7 @@ module esch384 (
         .perm_done  (perm_done)
     );
 
-    esch384_datapath u_dp (
+    esch384_datapath #(.NALZ(NALZ)) u_dp (
         .clk          (clk),
         .rst          (rst),
         .blk_data     (blk_data),

@@ -12,3 +12,4 @@
 | P3 task 2: linear layer L8 (rtl/sparkle_linear.sv) + tb_sparkle_linear | Henry Su | Done | 64/64 pass; 2 mutated copies fail; synth OK, 320 LUTs | 2026-11-09 |
 | P3 task 3: SPARKLE512 (rtl/sparkle_step.sv, rtl/sparkle512.sv) + tb_sparkle512 | Henry Su | Done | 71/71 (64 vectors + busy/reset/back-to-back); 2 mutations fail; synth 2023 LUTs, 521 FFs. Note: xsim crashes on string ternaries passed to tasks, use a variable | 2026-11-09 |
 | P3 task 6: top level (rtl/esch384.sv) + full KAT tb_esch384 | Nick Ngo | Done | 1025/1025 official KATs, 34/34 custom, cycle + handshake checks; 4 mutated copies fail; trace matches ref; synth 2604 LUTs, 530 FFs | 2026-11-18 |
+| P4 variant 1: shared Alzettes, NALZ = 8/4/2/1 (branch area/alzette-sharing) | Nick Ngo | Written, not yet simulated | Perl model of the scheme matches 64 vectors x 4 settings; run scripts/area_sweep.sh on Grendel | 2026-11-19 |

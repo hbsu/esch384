@@ -14,6 +14,7 @@
 | 2026-11-10 | Claude Code (Claude Opus 5.5) | slides/pptx_to_pdf.py, slides/esch384_progress.pdf | PDF version of the progress slide (no LibreOffice on Grendel) |
 | 2026-11-18 | Claude Code (Claude Opus 5.5) | rtl/esch_inject.sv, rtl/esch384_datapath.sv, rtl/esch384_ctrl.sv | Nick wrote the RTL; Claude explained the spec, suggested the module split and ports, reviewed each file, gave code snippets (padding loop, l(), ConstM, FSM skeleton), and fixed syntax in esch384_ctrl.sv plus two bugs in esch384_datapath.sv |
 | 2026-11-18 | Claude Code (Claude Opus 5) | rtl/esch384.sv, tb/tb_esch384.sv, docs/architecture.md section 3 | Phase 3 task 6: top-level wiring, KAT-driven testbench (digest, cycle count, handshake, TRACE debug output), mutation testing, architecture write-up |
+| 2026-11-19 | Claude Code (Claude Opus 5.5) | rtl/sparkle512.sv, rtl/esch384_datapath.sv, rtl/esch384.sv, tb/tb_sparkle512.sv, tb/tb_esch384.sv, scripts/run_sim.sh, scripts/area_sweep.sh, syn/fmax_ooc.tcl, docs/results.md | Phase 4 variant 1: NALZ parameter (8/4/2/1 shared Alzettes), testbenches parameterized, sweep script (tests + place-and-route + power). Scheme checked with a Perl cycle model against the permutation vectors (256/256; mutated model fails) |
 
 ## Notable prompts
 - "Begin Phase 1" (from CLAUDE.md): environment check, course notes,

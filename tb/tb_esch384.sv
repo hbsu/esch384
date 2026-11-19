@@ -17,12 +17,18 @@
 // Checks per message: digest bytes, the handshake (a block moves only on
 // valid and ready, the core is not ready while permuting, a digest chunk is
 // held while the receiver backpressures), and, when neither side stalls,
-// the cycle count against 10n + 24 for an n-block message.
+// the cycle count against (8*NSUB + 2)*n + 20*NSUB + 4 for an n-block
+// message, NSUB = 8/NALZ (NALZ = 8: 10n + 24).
+//
+// Parameter NALZ (8, 4, 2, 1) is passed to the DUT; set it with
+//   NALZ=<n> scripts/run_sim.sh tb_esch384
 //
 // Prints TEST PASSED (N/N) or TEST FAILED (k errors of N).
 
 `timescale 1ns/1ps
 module tb_esch384;
+    parameter integer NALZ = 8;
+    localparam integer NSUB = 8 / NALZ;
 
     // ---------------------------------------------------------------- DUT
     logic         clk, rst;
@@ -32,7 +38,7 @@ module tb_esch384;
     logic [127:0] digest_chunk;
     logic         out_valid, out_ready;
 
-    esch384 dut (
+    esch384 #(.NALZ(NALZ)) dut (
         .clk          (clk),
         .rst          (rst),
         .blk_data     (blk_data),
@@ -144,7 +150,9 @@ module tb_esch384;
     always @(posedge clk) begin
         p_inject  <= dut.do_inject;
         p_squeeze <= dut.do_squeeze;
-        p_busy    <= dut.u_dp.u_perm.busy;
+        // a whole step finished on this edge (with shared Alzettes a step
+        // takes several cycles; only print once it is complete)
+        p_busy    <= dut.u_dp.u_perm.step_end;
     end
 
     task automatic print_state(input string tag);
@@ -300,7 +308,7 @@ module tb_esch384;
         end
 
         if (check_cycles) begin
-            expc = 10 * nblk + 24;
+            expc = (8 * NSUB + 2) * nblk + 20 * NSUB + 4;
             if (t1 - t0 != expc) begin
                 $display("ERROR record %0d: %0d blocks took %0d cycles, expected %0d",
                          kat_count, nblk, t1 - t0, expc);
@@ -364,6 +372,7 @@ module tb_esch384;
         end
         $fclose(fd);
 
+        $display("NALZ = %0d (%0d cycles per step)", NALZ, NSUB);
         if (nrec == 0)
             $display("TEST FAILED (no KAT records read from '%s')", katfile);
         else if (errs == 0)

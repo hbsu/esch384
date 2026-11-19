@@ -1,20 +1,25 @@
 // tb_sparkle512.sv
-// Self-checking testbench for sparkle512 (iterative, 1 step/cycle).
+// Self-checking testbench for sparkle512 (iterative).
+// Parameter NALZ (8, 4, 2, 1) is passed to the DUT; set it with
+//   NALZ=<n> scripts/run_sim.sh tb_sparkle512
 // Vectors: <VEC_DIR>/sparkle512_slim8.txt (big=0) and
 //          <VEC_DIR>/sparkle512_big12.txt (big=1), from +VEC_DIR=<dir>.
 //          Each line: 16 hex input words, "|", 16 hex output words.
-// Per vector: pulse start, check done comes exactly 9 (slim) / 13 (big)
-//   cycles after the start cycle, busy high until done, busy low at done,
-//   state_out correct and held stable while idle.
+// Per vector: pulse start, check done comes exactly steps*(8/NALZ)+1
+//   cycles after the start cycle (NALZ=8: 9 slim / 13 big), busy high
+//   until done, busy low at done, state_out correct and held while idle.
 // Extra checks: start while busy ignored, reset mid-run, back-to-back runs.
 // Prints TEST PASSED (N/N) or TEST FAILED (k errors of N).
 `timescale 1ns/1ps
 module tb_sparkle512;
+    parameter integer NALZ = 8;
+    localparam integer NSUB = 8 / NALZ;
+
     logic         clk, rst, start, big;
     logic [511:0] state_in, state_out;
     logic         busy, done;
 
-    sparkle512 dut (.clk(clk), .rst(rst), .start(start), .big(big),
+    sparkle512 #(.NALZ(NALZ)) dut (.clk(clk), .rst(rst), .start(start), .big(big),
                     .state_in(state_in), .state_out(state_out),
                     .busy(busy), .done(done));
 
@@ -91,13 +96,13 @@ module tb_sparkle512;
                            output integer bad);
         integer cyc, nexp, k;
         bad  = 0;
-        nexp = vbig[idx] ? 13 : 9;
+        nexp = (vbig[idx] ? 12 : 8) * NSUB + 1;
         start = 1; big = vbig[idx]; state_in = vin[idx];
         @(posedge clk);            // start sampled here (counts as cycle 1)
         cyc = 1;
         @(negedge clk);
         start = 0; big = ~vbig[idx]; state_in = ~vin[idx];  // must not matter
-        while (!done && cyc < 40) begin
+        while (!done && cyc < 200) begin
             if (busy !== 1'b1) begin
                 if (!bad) $display("ERROR %s line %0d: busy low before done (cycle %0d)",
                                    tag, vline[idx], cyc);
@@ -186,6 +191,7 @@ module tb_sparkle512;
             run_vec(slim0 + 5, 1, 0, "b2b-3", b1); check(b1);
         end
 
+        $display("NALZ = %0d (%0d cycles per step)", NALZ, NSUB);
         if (nvec == 0) $display("TEST FAILED (no vectors read)");
         else if (errs == 0) $display("TEST PASSED (%0d/%0d)", nchk, nchk);
         else $display("TEST FAILED (%0d errors of %0d)", errs, nchk);
